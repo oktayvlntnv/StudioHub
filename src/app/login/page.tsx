@@ -14,12 +14,12 @@ export default function LoginPage() {
         </div>
         <h1 className="mt-6 text-3xl font-bold text-white">StudioHub Private</h1>
         <p className="mt-3 text-sm leading-6 text-slate-300">
-          Owner-only login screen placeholder. Public registration is not part of
-          the MVP.
+          Owner-only access for your private media dashboard. Public registration
+          is disabled.
         </p>
         <LoginForm />
         <p className="mt-6 text-xs leading-5 text-slate-500">
-          Supabase Auth and route protection will be connected in the next phase.
+          Sign in with the owner account configured in Supabase.
         </p>
       </section>
     </main>
