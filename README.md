@@ -14,7 +14,7 @@ It is not a piracy platform. The app must not host illegal copyrighted files, sc
 - M3U parser/import route with pending-review workflow
 - Xtream-compatible server connector with encrypted credential storage
 - TMDB search/import API and admin metadata panel
-- Legal discovery panel for Internet Archive, IPTV-org live TV, and YouTube Creative Commons
+- Legal discovery panel and auto-fill importer for Internet Archive, IPTV-org live TV, and YouTube Creative Commons
 - Review queue, import logs, source status, settings save, and safe mock fallback
 - PWA manifest, icon, and conservative app-shell service worker
 
@@ -113,6 +113,8 @@ Open `/sources` and use the Legal discovery panel to find candidate content from
 - Internet Archive: searches public archive metadata and imports playable files when available.
 - IPTV-org Live TV: searches the public IPTV-org API, skips geo-blocked labels and streams requiring custom headers, then imports as live TV.
 - YouTube Creative Commons: uses the official YouTube Data API with embeddable and Creative Commons filters. Add `YOUTUBE_API_KEY` in Vercel to enable it.
+
+Use **Auto-fill starter catalog** to run several searches at once. By default it imports items into review so the catalog stays private and legally controlled. To make imported items immediately visible in Movies or Live TV, check the legal confirmation box and import as approved only after you have verified the source.
 
 Discovery imports are owner-only. Import as `pending_review` by default, or check the legal confirmation box and import as `approved` when you have verified that the selected items are legal for your use.
 

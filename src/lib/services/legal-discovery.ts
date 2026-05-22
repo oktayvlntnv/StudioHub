@@ -23,8 +23,21 @@ export const legalDiscoveryImportSchema = legalDiscoverySearchSchema.extend({
   isLegalConfirmed: z.boolean().default(false),
 });
 
+export const legalDiscoveryAutoImportSchema = z.object({
+  includeInternetArchive: z.boolean().default(true),
+  includeIptvOrg: z.boolean().default(true),
+  includeYouTube: z.boolean().default(false),
+  country: z.string().trim().max(2).optional().default(""),
+  maxPerPreset: z.coerce.number().int().min(3).max(25).default(8),
+  importStatus: z.enum(["pending_review", "approved"]).default("pending_review"),
+  isLegalConfirmed: z.boolean().default(false),
+});
+
 export type DiscoverySearchInput = z.infer<typeof legalDiscoverySearchSchema>;
 export type DiscoveryImportInput = z.infer<typeof legalDiscoveryImportSchema>;
+export type DiscoveryAutoImportInput = z.infer<
+  typeof legalDiscoveryAutoImportSchema
+>;
 
 export interface LegalDiscoveryResult {
   id: string;
@@ -134,7 +147,10 @@ function parseYouTubeDuration(duration?: string) {
   return Math.max(1, Math.round(hours * 60 + minutes + seconds / 60));
 }
 
-function legalStatus(source: DiscoveryImportInput) {
+function legalStatus(source: {
+  importStatus: "pending_review" | "approved";
+  isLegalConfirmed: boolean;
+}) {
   if (source.importStatus === "approved" && !source.isLegalConfirmed) {
     throw new Error("Legal confirmation is required before importing as approved.");
   }
@@ -612,6 +628,20 @@ export async function importLegalDiscovery(input: DiscoveryImportInput) {
     maxResults: Math.max(payload.maxResults, payload.selectedIds.length),
   });
   const selected = candidates.filter((item) => payload.selectedIds.includes(item.id));
+  const summary = await importDiscoveryResults(selected, status);
+
+  return {
+    itemsFound: selected.length,
+    itemsImported: summary.itemsImported,
+    itemsSkipped: summary.itemsSkipped,
+    message: `Imported ${summary.itemsImported} items. Skipped ${summary.itemsSkipped} duplicates.`,
+  };
+}
+
+async function importDiscoveryResults(
+  selected: LegalDiscoveryResult[],
+  status: ReturnType<typeof legalStatus>,
+) {
   let itemsImported = 0;
   let itemsSkipped = 0;
 
@@ -625,10 +655,105 @@ export async function importLegalDiscovery(input: DiscoveryImportInput) {
     itemsSkipped += summary.skipped;
   }
 
+  return { itemsImported, itemsSkipped };
+}
+
+function autoImportPresets(input: DiscoveryAutoImportInput): DiscoverySearchInput[] {
+  const presets: DiscoverySearchInput[] = [];
+  const country = input.country.toUpperCase();
+
+  if (input.includeInternetArchive) {
+    ["public domain feature film", "classic movie", "documentary", "short film"].forEach(
+      (query) =>
+        presets.push({
+          source: "internet_archive",
+          query,
+          country: "",
+          category: "",
+          maxResults: input.maxPerPreset,
+        }),
+    );
+  }
+
+  if (input.includeIptvOrg) {
+    [
+      { query: "", country, category: "" },
+      { query: "", country: "", category: "news" },
+      { query: "", country: "", category: "entertainment" },
+      { query: "", country: "", category: "documentary" },
+    ].forEach((preset) =>
+      presets.push({
+        source: "iptv_org",
+        query: preset.query,
+        country: preset.country,
+        category: preset.category,
+        maxResults: input.maxPerPreset,
+      }),
+    );
+  }
+
+  if (input.includeYouTube && isYouTubeConfigured()) {
+    ["creative commons documentary", "public domain movie"].forEach((query) =>
+      presets.push({
+        source: "youtube",
+        query,
+        country: "",
+        category: "",
+        maxResults: input.maxPerPreset,
+      }),
+    );
+  }
+
+  return presets;
+}
+
+export async function autoImportLegalDiscovery(input: DiscoveryAutoImportInput) {
+  const payload = legalDiscoveryAutoImportSchema.parse(input);
+  const status = legalStatus(payload);
+
+  if (!isSupabaseAdminConfigured()) {
+    return {
+      itemsFound: 0,
+      itemsImported: 0,
+      itemsSkipped: 0,
+      searchesRun: 0,
+      message: "Auto discovery import requires Supabase admin credentials.",
+    };
+  }
+
+  const presets = autoImportPresets(payload);
+  let itemsFound = 0;
+  let itemsImported = 0;
+  let itemsSkipped = 0;
+  let searchesRun = 0;
+
+  for (const preset of presets) {
+    try {
+      const results = await searchLegalContent(preset);
+      searchesRun += 1;
+      itemsFound += results.length;
+      const summary = await importDiscoveryResults(results, status);
+      itemsImported += summary.itemsImported;
+      itemsSkipped += summary.itemsSkipped;
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("[legal-discovery:auto-import]", {
+          source: preset.source,
+          query: preset.query,
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
+    }
+  }
+
   return {
-    itemsFound: selected.length,
+    itemsFound,
     itemsImported,
     itemsSkipped,
-    message: `Imported ${itemsImported} items. Skipped ${itemsSkipped} duplicates.`,
+    searchesRun,
+    message:
+      payload.importStatus === "approved"
+        ? `Auto discovery imported ${itemsImported} approved items and skipped ${itemsSkipped} duplicates.`
+        : `Auto discovery imported ${itemsImported} review items and skipped ${itemsSkipped} duplicates.`,
   };
 }
