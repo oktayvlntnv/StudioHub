@@ -54,8 +54,8 @@ export function M3UImportForm() {
       <div>
         <h2 className="text-xl font-bold text-white">Legal M3U import</h2>
         <p className="mt-2 text-sm leading-6 text-slate-300">
-          Mock form only. Imported channels will start as pending review in the
-          real connector.
+          Import a legal playlist from an official or authorized source. Imported
+          channels start as pending review.
         </p>
       </div>
       <label className="block">

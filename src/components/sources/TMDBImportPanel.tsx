@@ -88,7 +88,7 @@ export function TMDBImportPanel() {
                 <div>
                   <p className="font-semibold text-white">{result.title}</p>
                   <p className="mt-1 text-xs uppercase tracking-wide text-slate-500">
-                    {result.mediaType} {result.releaseDate ? `• ${result.releaseDate}` : ""}
+                    {result.mediaType} {result.releaseDate ? `/ ${result.releaseDate}` : ""}
                   </p>
                   <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-300">
                     {result.overview || "No overview available."}

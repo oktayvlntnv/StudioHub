@@ -43,7 +43,7 @@ export default async function TitlePage({ params }: TitlePageProps) {
               />
               <div className="flex flex-col justify-end">
                 <p className="text-xs font-semibold uppercase tracking-wide text-teal-100">
-                  {item.mediaType === "movie" ? "Movie" : "TV Show"} •{" "}
+                  {item.mediaType === "movie" ? "Movie" : "TV Show"} /{" "}
                   {getYear(item.releaseDate)}
                 </p>
                 <h1 className="mt-3 text-4xl font-bold text-white sm:text-5xl">
@@ -170,8 +170,8 @@ export default async function TitlePage({ params }: TitlePageProps) {
         <section className="rounded-2xl border border-white/10 bg-white/[0.05] p-5">
           <h2 className="text-2xl font-bold text-white">Trailer</h2>
           <p className="mt-2 text-sm leading-6 text-slate-300">
-            Trailer metadata will come from TMDB later. This mock MVP keeps the
-            section ready without calling TMDB yet.
+            Add an official YouTube trailer link from the provider section when
+            embedding is allowed.
           </p>
         </section>
       </article>

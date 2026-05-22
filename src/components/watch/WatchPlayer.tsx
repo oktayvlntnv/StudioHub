@@ -22,7 +22,7 @@ export function WatchPlayer({ item, channel, link }: WatchPlayerProps) {
   if (!playbackType || !accessType || !sourceType) {
     return (
       <SafeNotice
-        body="This item has no playback metadata in the mock catalog."
+        body="This item has no approved playback metadata yet."
         title="Playback unavailable"
       />
     );
@@ -95,9 +95,8 @@ export function WatchPlayer({ item, channel, link }: WatchPlayerProps) {
           Owner credentials required
         </h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-fuchsia-50/85">
-          Xtream playback is represented as a safe mock state. Future server
-          logic will keep credentials private and will not proxy, scrape, or
-          bypass provider restrictions.
+          Xtream credentials stay server-side. StudioHub will not proxy, scrape,
+          expose tokens, or bypass provider restrictions.
         </p>
         <MetaBadges
           accessType={accessType}
@@ -125,8 +124,8 @@ export function WatchPlayer({ item, channel, link }: WatchPlayerProps) {
 
   return (
     <SafeNotice
-      body={`No direct playback URL is exposed for ${providerName}. Use an official provider link or add a legally approved playback source later.`}
-      title="Safe playback placeholder"
+      body={`No direct playback URL is exposed for ${providerName}. Use an official provider link or add a legally approved playback source.`}
+      title="Safe playback notice"
     />
   );
 }

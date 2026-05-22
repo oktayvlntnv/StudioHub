@@ -30,7 +30,7 @@ export function MediaCard({ item }: MediaCardProps) {
           </div>
           <div className="absolute bottom-0 left-0 right-0 p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-white/70">
-              {item.mediaType === "movie" ? "Movie" : "TV Show"} • {getYear(item.releaseDate)}
+              {item.mediaType === "movie" ? "Movie" : "TV Show"} / {getYear(item.releaseDate)}
             </p>
             <h3 className="mt-2 line-clamp-2 text-xl font-bold text-white">
               {item.title}

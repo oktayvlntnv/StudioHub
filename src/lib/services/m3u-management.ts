@@ -109,7 +109,7 @@ function toUpdateRow(input: M3USourceUpdateInput) {
 function mockResult(action: string, sourceId: string) {
   debugM3UAction(action, sourceId, 0);
   return {
-    message: `${action} validated in mock mode.`,
+    message: `${action} validated. Configure Supabase admin credentials to persist changes.`,
     affectedRows: 0,
     stats: { total: 0, pending: 0, approved: 0, rejected: 0 } satisfies M3UChannelStats,
   };

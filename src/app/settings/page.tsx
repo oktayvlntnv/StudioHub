@@ -14,7 +14,7 @@ export default async function SettingsPage() {
     <PrivateShell>
       <div className="space-y-6">
         <PageHeader
-          description="Owner preferences for legal-safe discovery and playback defaults. These controls are mock-only in the first frontend pass."
+          description="Owner preferences for legal-safe discovery and playback defaults."
           eyebrow="Owner settings"
           title="Settings"
         />

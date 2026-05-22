@@ -543,6 +543,11 @@ export async function getM3USources() {
   );
 }
 
+export async function getXtreamSources() {
+  const sources = await getSources();
+  return sources.filter((source) => source.sourceType === "xtream");
+}
+
 export async function getM3USource(sourceId: string) {
   const sources = await getM3USources();
   return sources.find((source) => source.id === sourceId);

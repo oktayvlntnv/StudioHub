@@ -22,7 +22,9 @@ export async function PATCH(request: Request) {
     const payload = settingsSchema.parse(await request.json());
 
     if (!isSupabaseAdminConfigured()) {
-      return NextResponse.json({ message: "Mock settings saved." });
+      return NextResponse.json({
+        message: "Settings validated. Configure Supabase admin credentials to persist changes.",
+      });
     }
 
     const admin = createSupabaseAdminClient();

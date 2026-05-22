@@ -20,18 +20,24 @@ export async function POST(request: Request) {
     const payload = reviewSchema.parse(await request.json());
     if (!isSupabaseAdminConfigured()) {
       return NextResponse.json({
-        message: `Mock ${payload.itemType} item marked ${payload.status}.`,
+        message: `${payload.itemType} item review validated as ${payload.status}. Configure Supabase admin credentials to persist changes.`,
       });
     }
 
     const admin = createSupabaseAdminClient();
     const table = payload.itemType === "media" ? "media_items" : "live_channels";
+    const update: Record<string, unknown> = {
+      import_status: payload.status,
+      legal_review_notes: payload.notes ?? null,
+    };
+
+    if (payload.itemType === "live") {
+      update.is_legal_confirmed = payload.status === "approved";
+    }
+
     const { error } = await admin!
       .from(table)
-      .update({
-        import_status: payload.status,
-        legal_review_notes: payload.notes ?? null,
-      })
+      .update(update)
       .eq("id", payload.id);
 
     if (error) throw new Error(error.message);

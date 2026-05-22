@@ -100,7 +100,11 @@ export async function POST(request: Request) {
 
     if (!isSupabaseAdminConfigured()) {
       return NextResponse.json(
-        { id: "mock-provider", message: "Provider validated in mock mode." },
+        {
+          id: "mock-provider",
+          message:
+            "Provider validated. Configure Supabase admin credentials to persist it.",
+        },
         { status: 201 },
       );
     }
@@ -157,7 +161,11 @@ export async function PATCH(request: Request) {
     }
 
     if (!isSupabaseAdminConfigured()) {
-      return NextResponse.json({ id, message: "Provider updated in mock mode." });
+      return NextResponse.json({
+        id,
+        message:
+          "Provider update validated. Configure Supabase admin credentials to persist it.",
+      });
     }
 
     const update: Record<string, unknown> = {};
@@ -222,7 +230,11 @@ export async function DELETE(request: Request) {
     if (!id) return jsonError("Provider id is required.", 400);
 
     if (!isSupabaseAdminConfigured()) {
-      return NextResponse.json({ id, message: "Provider deleted in mock mode." });
+      return NextResponse.json({
+        id,
+        message:
+          "Provider delete validated. Configure Supabase admin credentials to persist it.",
+      });
     }
 
     const admin = createSupabaseAdminClient();

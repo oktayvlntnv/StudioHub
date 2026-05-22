@@ -141,7 +141,7 @@ export async function importM3UPlaylist(input: z.infer<typeof m3uImportSchema>) 
       itemsImported: 0,
       preview: channels.slice(0, 20).map(previewChannel),
       message:
-        "Parsed playlist in mock mode. Configure Supabase service role to import.",
+        "Parsed playlist. Configure Supabase admin credentials to persist imported channels.",
     };
   }
 

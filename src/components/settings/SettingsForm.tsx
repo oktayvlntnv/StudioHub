@@ -18,29 +18,47 @@ export function SettingsForm({ settings }: SettingsFormProps) {
   const [categories, setCategories] = useState(
     settings.preferredCategories.join(", "),
   );
-  const [status, setStatus] = useState<string | null>(null);
+  const [status, setStatus] = useState<{
+    kind: "success" | "error";
+    message: string;
+  } | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setStatus(null);
+    setIsSaving(true);
     const toList = (value: string) =>
       value
         .split(",")
         .map((item) => item.trim())
         .filter(Boolean);
-    const response = await fetch("/api/settings", {
-      method: "PATCH",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        preferredLanguages: toList(languages),
-        preferredCountries: toList(countries),
-        preferredCategories: toList(categories),
-        defaultPlaybackPreference: preference,
-        hideUnknownAccess: hideUnknown,
-        hideUnconfirmedSources: hideUnconfirmed,
-      }),
-    });
-    const result = await response.json();
-    setStatus(result.message ?? result.error ?? "Settings saved.");
+    try {
+      const response = await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          preferredLanguages: toList(languages),
+          preferredCountries: toList(countries),
+          preferredCategories: toList(categories),
+          defaultPlaybackPreference: preference,
+          hideUnknownAccess: hideUnknown,
+          hideUnconfirmedSources: hideUnconfirmed,
+        }),
+      });
+      const result = await response.json();
+      setStatus({
+        kind: response.ok ? "success" : "error",
+        message: result.message ?? result.error ?? "Settings saved.",
+      });
+    } catch (error) {
+      setStatus({
+        kind: "error",
+        message: error instanceof Error ? error.message : "Could not save settings.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -120,14 +138,21 @@ export function SettingsForm({ settings }: SettingsFormProps) {
           />
         </label>
         <button
-          className="min-h-12 rounded-xl bg-teal-300 px-5 text-sm font-bold text-slate-950 outline-none transition hover:bg-teal-200 focus-visible:ring-2 focus-visible:ring-teal-100"
+          className="min-h-12 rounded-xl bg-teal-300 px-5 text-sm font-bold text-slate-950 outline-none transition enabled:hover:bg-teal-200 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-teal-100"
+          disabled={isSaving}
           type="submit"
         >
-          Save settings
+          {isSaving ? "Saving..." : "Save settings"}
         </button>
         {status ? (
-          <p className="rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-slate-200">
-            {status}
+          <p
+            className={
+              status.kind === "success"
+                ? "rounded-xl border border-emerald-300/25 bg-emerald-300/10 px-4 py-3 text-sm text-emerald-100"
+                : "rounded-xl border border-rose-300/25 bg-rose-300/10 px-4 py-3 text-sm text-rose-100"
+            }
+          >
+            {status.message}
           </p>
         ) : null}
       </section>

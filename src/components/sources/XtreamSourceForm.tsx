@@ -1,9 +1,11 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 
 export function XtreamSourceForm() {
+  const router = useRouter();
   const [confirmed, setConfirmed] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,19 +29,31 @@ export function XtreamSourceForm() {
     setIsSubmitting(true);
     setStatus(null);
 
-    const response = await fetch("/api/sources", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        sourceType: "xtream",
-        ...form,
-        isLegalConfirmed: confirmed,
-      }),
-    });
+    try {
+      const response = await fetch("/api/sources", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          sourceType: "xtream",
+          ...form,
+          isLegalConfirmed: confirmed,
+        }),
+      });
 
-    const result = await response.json();
-    setIsSubmitting(false);
-    setStatus(result.message ?? result.error ?? "Save request completed.");
+      const result = await response.json();
+      setStatus(result.message ?? result.error ?? "Save request completed.");
+      if (response.ok) {
+        setForm((current) => ({ ...current, password: "" }));
+        setConfirmed(false);
+        router.refresh();
+      }
+    } catch (error) {
+      setStatus(
+        error instanceof Error ? error.message : "Could not save Xtream source.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -50,8 +64,8 @@ export function XtreamSourceForm() {
       <div>
         <h2 className="text-xl font-bold text-white">Xtream-compatible source</h2>
         <p className="mt-2 text-sm leading-6 text-slate-300">
-          Mock form only. Password fields are shown for UI planning, but this MVP
-          does not store or send credentials.
+          Add verified legal providers only. Credentials are encrypted server-side
+          and never returned to the browser.
         </p>
       </div>
       <div className="grid gap-4 md:grid-cols-2">

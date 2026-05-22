@@ -52,7 +52,7 @@ export default async function SourcesPage() {
               </Link>
             </>
           }
-          description="Admin-only mock source management with legal confirmation, disabled defaults, and review queues."
+          description="Admin-only source management with legal confirmation, disabled defaults, and review queues."
           eyebrow="Owner/admin"
           title="Sources"
         />

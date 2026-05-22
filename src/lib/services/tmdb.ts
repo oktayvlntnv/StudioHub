@@ -162,7 +162,7 @@ export async function importTmdbMetadata(input: z.infer<typeof tmdbImportSchema>
       item,
       trailer,
       message:
-        "Fetched TMDB metadata in mock mode. Configure Supabase service role to save.",
+        "Fetched TMDB metadata. Configure Supabase admin credentials to save imports.",
     };
   }
 

@@ -88,7 +88,11 @@ export async function POST(request: Request) {
 
     if (!isSupabaseAdminConfigured()) {
       return NextResponse.json(
-        { id: "mock-provider-link", message: "Mock provider link saved." },
+        {
+          id: "mock-provider-link",
+          message:
+            "Provider link validated. Configure Supabase admin credentials to persist it.",
+        },
         { status: 201 },
       );
     }

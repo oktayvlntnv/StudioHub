@@ -20,7 +20,7 @@ export function LiveChannelCard({ channel }: LiveChannelCardProps) {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                {channel.category} • {channel.country} • {channel.language}
+                {channel.category} / {channel.country} / {channel.language}
               </p>
               <h3 className="mt-1 text-lg font-bold text-white">{channel.name}</h3>
             </div>

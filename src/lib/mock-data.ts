@@ -456,7 +456,7 @@ export const liveChannels: LiveChannel[] = [
     id: "live-xtream-placeholder",
     name: "Verified Xtream Demo Channel",
     description:
-      "Credential-protected placeholder. Credentials stay server-side in the future connector.",
+      "Credential-protected source. Credentials stay server-side.",
     logoTone: "from-fuchsia-500 to-violet-500",
     category: "Entertainment",
     country: "Global",

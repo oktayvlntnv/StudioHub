@@ -54,44 +54,99 @@ export function ProviderManagementPanel({
   const [edits, setEdits] = useState<Record<string, ProviderFormState>>(() =>
     Object.fromEntries(providers.map((provider) => [provider.id, toForm(provider)])),
   );
-  const [status, setStatus] = useState<string | null>(null);
+  const [status, setStatus] = useState<{
+    kind: "success" | "error";
+    message: string;
+  } | null>(null);
+  const [runningAction, setRunningAction] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   async function saveProvider(form: ProviderFormState, id?: string) {
     setStatus(null);
-    const response = await fetch("/api/providers", {
-      method: id ? "PATCH" : "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(toPayload(form, id)),
-    });
-    const result = await response.json();
-    setStatus(result.message ?? result.error ?? (id ? "Provider updated." : "Provider added."));
-    if (response.ok) {
-      if (!id) setAddForm(emptyForm);
-      startTransition(() => router.refresh());
+    const actionId = id ? `save-${id}` : "add";
+    setRunningAction(actionId);
+    try {
+      const response = await fetch("/api/providers", {
+        method: id ? "PATCH" : "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(toPayload(form, id)),
+      });
+      const result = await response.json();
+      setStatus({
+        kind: response.ok ? "success" : "error",
+        message:
+          result.message ??
+          result.error ??
+          (id ? "Provider updated." : "Provider added."),
+      });
+      if (response.ok) {
+        if (!id) setAddForm(emptyForm);
+        startTransition(() => router.refresh());
+      }
+    } catch (error) {
+      setStatus({
+        kind: "error",
+        message: error instanceof Error ? error.message : "Provider save failed.",
+      });
+    } finally {
+      setRunningAction(null);
     }
   }
 
   async function toggleProvider(provider: Provider) {
     setStatus(null);
-    const response = await fetch("/api/providers", {
-      method: "PATCH",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ id: provider.id, isEnabled: !provider.isEnabled }),
-    });
-    const result = await response.json();
-    setStatus(result.message ?? result.error ?? "Provider status updated.");
-    if (response.ok) startTransition(() => router.refresh());
+    setRunningAction(`toggle-${provider.id}`);
+    try {
+      const response = await fetch("/api/providers", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ id: provider.id, isEnabled: !provider.isEnabled }),
+      });
+      const result = await response.json();
+      setStatus({
+        kind: response.ok ? "success" : "error",
+        message: result.message ?? result.error ?? "Provider status updated.",
+      });
+      if (response.ok) startTransition(() => router.refresh());
+    } catch (error) {
+      setStatus({
+        kind: "error",
+        message: error instanceof Error ? error.message : "Provider update failed.",
+      });
+    } finally {
+      setRunningAction(null);
+    }
   }
 
   async function deleteProvider(provider: Provider) {
+    const confirmed = window.confirm(
+      `Delete ${provider.name}? Existing provider links may lose their provider metadata. This does not delete media items.`,
+    );
+    if (!confirmed) return;
+
     setStatus(null);
-    const response = await fetch(`/api/providers?id=${encodeURIComponent(provider.id)}`, {
-      method: "DELETE",
-    });
-    const result = await response.json();
-    setStatus(result.message ?? result.error ?? "Provider deleted.");
-    if (response.ok) startTransition(() => router.refresh());
+    setRunningAction(`delete-${provider.id}`);
+    try {
+      const response = await fetch(
+        `/api/providers?id=${encodeURIComponent(provider.id)}`,
+        {
+          method: "DELETE",
+        },
+      );
+      const result = await response.json();
+      setStatus({
+        kind: response.ok ? "success" : "error",
+        message: result.message ?? result.error ?? "Provider deleted.",
+      });
+      if (response.ok) startTransition(() => router.refresh());
+    } catch (error) {
+      setStatus({
+        kind: "error",
+        message: error instanceof Error ? error.message : "Provider delete failed.",
+      });
+    } finally {
+      setRunningAction(null);
+    }
   }
 
   return (
@@ -113,17 +168,23 @@ export function ProviderManagementPanel({
         <ProviderFields form={addForm} onChange={setAddForm} />
         <button
           className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-teal-300 px-5 text-sm font-bold text-slate-950 outline-none transition enabled:hover:bg-teal-200 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-teal-100"
-          disabled={isPending || !addForm.name}
+          disabled={isPending || Boolean(runningAction) || !addForm.name}
           type="submit"
         >
           <Plus className="size-4" aria-hidden="true" />
-          Add provider
+          {runningAction === "add" ? "Adding..." : "Add provider"}
         </button>
       </form>
 
       {status ? (
-        <p className="rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-slate-200">
-          {status}
+        <p
+          className={
+            status.kind === "success"
+              ? "rounded-xl border border-emerald-300/25 bg-emerald-300/10 px-4 py-3 text-sm text-emerald-100"
+              : "rounded-xl border border-rose-300/25 bg-rose-300/10 px-4 py-3 text-sm text-rose-100"
+          }
+        >
+          {status.message}
         </p>
       ) : null}
 
@@ -186,6 +247,7 @@ export function ProviderManagementPanel({
                 ) : null}
                 <button
                   className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-4 text-sm font-bold text-white outline-none transition hover:bg-white/[0.1] focus-visible:ring-2 focus-visible:ring-teal-300"
+                  disabled={Boolean(runningAction)}
                   onClick={() => toggleProvider(provider)}
                   type="button"
                 >
@@ -194,15 +256,20 @@ export function ProviderManagementPanel({
                   ) : (
                     <ToggleLeft className="size-4 text-slate-300" aria-hidden="true" />
                   )}
-                  {provider.isEnabled ? "Disable" : "Enable"}
+                  {runningAction === `toggle-${provider.id}`
+                    ? "Saving..."
+                    : provider.isEnabled
+                      ? "Disable"
+                      : "Enable"}
                 </button>
                 <button
                   className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-rose-300/20 bg-rose-300/10 px-4 text-sm font-bold text-rose-100 outline-none transition hover:bg-rose-300/15 focus-visible:ring-2 focus-visible:ring-rose-200"
+                  disabled={Boolean(runningAction)}
                   onClick={() => deleteProvider(provider)}
                   type="button"
                 >
                   <Trash2 className="size-4" aria-hidden="true" />
-                  Delete
+                  {runningAction === `delete-${provider.id}` ? "Deleting..." : "Delete"}
                 </button>
               </div>
 
@@ -225,11 +292,13 @@ export function ProviderManagementPanel({
                   />
                   <button
                     className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-teal-300 px-5 text-sm font-bold text-slate-950 outline-none transition enabled:hover:bg-teal-200 disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-teal-100"
-                    disabled={isPending}
+                    disabled={isPending || Boolean(runningAction)}
                     type="submit"
                   >
                     <Save className="size-4" aria-hidden="true" />
-                    Save changes
+                    {runningAction === `save-${provider.id}`
+                      ? "Saving..."
+                      : "Save changes"}
                   </button>
                 </form>
               </details>

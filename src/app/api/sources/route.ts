@@ -46,7 +46,11 @@ export async function POST(request: Request) {
 
     if (!isSupabaseAdminConfigured()) {
       return NextResponse.json(
-        { id: "mock-source", message: "Validated source in mock mode." },
+        {
+          id: "mock-source",
+          message:
+            "Source validated. Configure Supabase admin credentials to persist it.",
+        },
         { status: 201 },
       );
     }

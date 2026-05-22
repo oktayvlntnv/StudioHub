@@ -61,7 +61,7 @@ export default async function WatchPage({ params, searchParams }: WatchPageProps
 
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-teal-200">
-            Watch mode mock
+            Watch mode
           </p>
           <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">{title}</h1>
           {description ? (

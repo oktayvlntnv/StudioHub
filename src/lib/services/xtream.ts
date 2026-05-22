@@ -109,7 +109,7 @@ export async function createXtreamSource(
     return {
       id: "mock-xtream-source",
       message:
-        "Validated Xtream source in mock mode. Configure Supabase to save encrypted credentials.",
+        "Xtream source validated locally. Configure Supabase admin credentials to save encrypted credentials.",
     };
   }
 
@@ -146,7 +146,10 @@ export async function createXtreamSource(
 export async function testConnection(input: z.infer<typeof xtreamSourceIdSchema>) {
   const { sourceId } = xtreamSourceIdSchema.parse(input);
   if (!isSupabaseAdminConfigured()) {
-    return { ok: true, message: "Mock test passed. Supabase is not configured." };
+    return {
+      ok: true,
+      message: "Connection test skipped because server persistence is not configured.",
+    };
   }
 
   const source = await getStoredSource(sourceId);
@@ -326,7 +329,11 @@ export function normalizeSeries(
 
 export async function importXtreamLive(sourceId: string) {
   if (!isSupabaseAdminConfigured()) {
-    return { itemsFound: 0, itemsImported: 0, message: "Mock Xtream live import." };
+    return {
+      itemsFound: 0,
+      itemsImported: 0,
+      message: "Live import skipped because server persistence is not configured.",
+    };
   }
   const [categories, streams] = await Promise.all([
     fetchLiveCategories(sourceId),
@@ -349,7 +356,11 @@ export async function importXtreamLive(sourceId: string) {
 
 export async function importXtreamMovies(sourceId: string) {
   if (!isSupabaseAdminConfigured()) {
-    return { itemsFound: 0, itemsImported: 0, message: "Mock Xtream movie import." };
+    return {
+      itemsFound: 0,
+      itemsImported: 0,
+      message: "Movie import skipped because server persistence is not configured.",
+    };
   }
   const [categories, streams] = await Promise.all([
     fetchMovieCategories(sourceId),
@@ -372,7 +383,11 @@ export async function importXtreamMovies(sourceId: string) {
 
 export async function importXtreamSeries(sourceId: string) {
   if (!isSupabaseAdminConfigured()) {
-    return { itemsFound: 0, itemsImported: 0, message: "Mock Xtream series import." };
+    return {
+      itemsFound: 0,
+      itemsImported: 0,
+      message: "Series import skipped because server persistence is not configured.",
+    };
   }
   const [categories, streams] = await Promise.all([
     fetchSeriesCategories(sourceId),

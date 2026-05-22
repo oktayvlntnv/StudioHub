@@ -84,8 +84,8 @@ export default async function Home() {
                   Continue watching
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-300">
-                  Placeholder state ready for watch history once authentication and
-                  persistence are connected.
+                  Your recently played titles will appear here as watch history is
+                  captured.
                 </p>
                 <div className="mt-5 h-2 rounded-full bg-white/10">
                   <div className="h-2 w-1/3 rounded-full bg-teal-300" />

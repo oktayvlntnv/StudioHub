@@ -75,7 +75,7 @@ export function PrivateShell({ children }: PrivateShellProps) {
             Private mode
           </p>
           <p className="mt-2 text-sm leading-6 text-slate-300">
-            Mock owner session. Public catalog and registration are intentionally
+            Owner-only app. Public catalog and registration are intentionally
             absent.
           </p>
         </div>
