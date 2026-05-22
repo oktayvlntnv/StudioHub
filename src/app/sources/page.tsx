@@ -4,6 +4,7 @@ import { PrivateShell } from "@/components/layout/PrivateShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SourceStatusCard } from "@/components/sources/SourceStatusCard";
 import { ImportLogTable } from "@/components/sources/ImportLogTable";
+import { LegalDiscoveryPanel } from "@/components/sources/LegalDiscoveryPanel";
 import { ReviewQueueTable } from "@/components/sources/ReviewQueueTable";
 import { TMDBImportPanel } from "@/components/sources/TMDBImportPanel";
 import {
@@ -64,6 +65,8 @@ export default async function SourcesPage() {
         </section>
 
         <TMDBImportPanel />
+
+        <LegalDiscoveryPanel />
 
         <section className="space-y-4">
           <h2 className="text-2xl font-bold text-white">Pending review</h2>

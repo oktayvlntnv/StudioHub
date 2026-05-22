@@ -14,6 +14,7 @@ It is not a piracy platform. The app must not host illegal copyrighted files, sc
 - M3U parser/import route with pending-review workflow
 - Xtream-compatible server connector with encrypted credential storage
 - TMDB search/import API and admin metadata panel
+- Legal discovery panel for Internet Archive, IPTV-org live TV, and YouTube Creative Commons
 - Review queue, import logs, source status, settings save, and safe mock fallback
 - PWA manifest, icon, and conservative app-shell service worker
 
@@ -22,9 +23,9 @@ It is not a piracy platform. The app must not host illegal copyrighted files, sc
 From this directory:
 
 ```bash
-node ../.tools/pnpm/bin/pnpm.cjs dev
-node ../.tools/pnpm/bin/pnpm.cjs lint
-node ../.tools/pnpm/bin/pnpm.cjs build
+node .tools/pnpm/bin/pnpm.cjs dev
+node .tools/pnpm/bin/pnpm.cjs lint
+node .tools/pnpm/bin/pnpm.cjs build
 ```
 
 If you have normal Node/npm tooling installed, `pnpm dev`, `pnpm lint`, and `pnpm build` also work.
@@ -38,6 +39,7 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 TMDB_API_KEY=
+YOUTUBE_API_KEY=
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 PRIVATE_APP_MODE=true
 ENCRYPTION_SECRET=
@@ -53,7 +55,7 @@ When Supabase env vars are absent, the app runs in safe mock mode. When they are
 2. Disable public signups in Supabase Auth settings for the MVP.
 3. Run `supabase/schema.sql` in the Supabase SQL editor.
 4. Create the owner user from the Supabase dashboard.
-5. In `public.profiles`, set that user’s role to `owner`.
+5. In `public.profiles`, set that user's role to `owner`.
 6. Optionally run `supabase/seed.sql` for legal placeholder data.
 7. Add the Supabase URL, anon key, and service role key to `.env.local`.
 
@@ -103,6 +105,18 @@ Xtream usernames/passwords are encrypted server-side and never returned to the f
 ## TMDB Workflow
 
 Use the TMDB panel on `/sources` to search and import metadata. TMDB is metadata only; it does not prove a title is free or legal to watch. Imported metadata remains pending review until an owner adds a legal playback source.
+
+## Legal Discovery Workflow
+
+Open `/sources` and use the Legal discovery panel to find candidate content from safe sources:
+
+- Internet Archive: searches public archive metadata and imports playable files when available.
+- IPTV-org Live TV: searches the public IPTV-org API, skips geo-blocked labels and streams requiring custom headers, then imports as live TV.
+- YouTube Creative Commons: uses the official YouTube Data API with embeddable and Creative Commons filters. Add `YOUTUBE_API_KEY` in Vercel to enable it.
+
+Discovery imports are owner-only. Import as `pending_review` by default, or check the legal confirmation box and import as `approved` when you have verified that the selected items are legal for your use.
+
+Plex, Tubi, Pluto TV, and similar providers are handled as official external links unless you have a provider-approved catalog export or API key. StudioHub does not scrape their catalogs or extract playback URLs.
 
 ## Deployment
 
